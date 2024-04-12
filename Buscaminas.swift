@@ -13,8 +13,8 @@ Roger Santos -> 78489
 Samuel Conde Rangel -> 77164
 */
 
-var tablero: [[Int]];
-var tamañoTablero: Int;
+var tablero: [[Int]] = [];
+var tamañoTablero: Int = 5;
  /* ESTADOS:
  -2 -> No tocada
  -1 -> Bomba
@@ -22,7 +22,7 @@ var tamañoTablero: Int;
   1 -> Bomba Cerca (tocada) */
 
  var perdiste: Bool = false;
- var coordenadas: String; 
+ var coordenadas: String = ""; 
 
 /*
     Crear el Tablero
@@ -49,8 +49,8 @@ Descripcion: Esta funcion recibe el tamaño del
 func crearBombas(_ tamañoTablero: Int){
     var contarBombas:Int = 0;
     while contarBombas < tamañoTablero{
-        var filaBomba: Int = Int.random(in: 0..<tamañoTablero);
-        var columnaBomba: Int = Int.random(in: 0..<tamañoTablero);
+        let filaBomba: Int = Int.random(in: 0..<tamañoTablero);
+        let columnaBomba: Int = Int.random(in: 0..<tamañoTablero);
         if(tablero[filaBomba][columnaBomba] != -1){
             tablero[filaBomba][columnaBomba] = -1;
             contarBombas += 1;
@@ -65,9 +65,9 @@ Salida: Imprime el tablero.
 Descripción: Imprime el tablero.
 Creador: Hazie
 */
-func mostrarTablero(){
+func mostrarTablero(_ tablero: [[Int]]){
     header();
-    for (index, fila) in tablero{
+    for (index, fila) in tablero.enumerated(){
         numeroAEmoji(index);
         for celda in fila{
             switch celda {
@@ -97,6 +97,8 @@ func mostrarTablero(){
                     print(" 7", terminator:"");
                 case 8:
                     print(" 8", terminator:"");
+                default:
+                    print(" ?", terminator: "");
             }
         }
         print(""); 
@@ -113,7 +115,7 @@ func mostrarTablero(){
 */
 func header(){
     var headerText = "";
-    var numeros = ["#️⃣ ","1️⃣ ","2️⃣ ","3️⃣ ","4️⃣ ","5️⃣ ","6️⃣ ","7️⃣ ","8️⃣ ","9️⃣ ","🔟 "];
+    let numeros = ["#️⃣ ","1️⃣ ","2️⃣ ","3️⃣ ","4️⃣ ","5️⃣ ","6️⃣ ","7️⃣ ","8️⃣ ","9️⃣ ","🔟 "];
     for i:Int in 0...tamañoTablero{
         headerText += numeros[i];
     }
@@ -130,9 +132,9 @@ Ejemplo:
 Entrada: 2
 Salida: 2️⃣
 */
-func numeroAEmoji(index:Int)->Int{
+func numeroAEmoji(_ indice:Int) -> Void{
     let numeros = ["1️⃣ ","2️⃣ ","3️⃣ ","4️⃣ ","5️⃣ ","6️⃣ ","7️⃣ ","8️⃣ ","9️⃣ ","🔟 "];
-    print(numeros[index],terminator:"");
+    print(numeros[indice],terminator:"");
 }
 
 /*
@@ -145,24 +147,67 @@ Autor: Francisco Aboytes Martínez
 Id: 78532
 */
 func jugar(){
-    print("Bienvenido al buscaminas");
-    print("Indique el tamaño del tablero o x para terminar: (Numero Entero X=3)");
+    var entradaValida = false;
+    print("Bienvenido al buscaminas"); // 1. Bienvenida
+    // 1.1 Pedir Tamaño de tablero
+    print("Indique el tamaño del tablero o salir para terminar: (Numero Entero X=3)");
+    // Ciclo para asegurar entrada valida
     repeat{
+        let entrada = readLine()!;
+        if let out = Int (entrada){
+            tamañoTablero = out;
+            entradaValida = true;
+            crearTablero(tamañoTablero); // 1.2 Crear Tablero
+            crearBombas(tamañoTablero); // 1.3 Generar Bombas
+            mostrarTablero(tablero); // 1.4 Mostrar tablero
+            print(tablero);
+        }
+        else {
+            entradaValida = false
+            print("Tamaño no valido, ingrese un entero o salir");
+        }
+    }
+    while (entradaValida == false);
 
-        var entrada = readLine()!;
-        
-    }
-    while (entrada != "");
-    
-    if tamañoTablero = Int (entrada){
-        crearTablero(tamañoTablero);
-        crearBombas(tamañoTablero);
-        print("Ingrese las coordenadas que desea asignar: (1,1)");
-        coordenadas = readLine()!;
-        obtenerCoordenadas(coordenadas);
-    }
-    else {
-        break
+    var coordenadasValidas = true;
+    while (coordenadasValidas){
+        // 2. Pedir Coordenadas
+        print("Ingrese las coordenadas que desea asignar: (1,1) o salir");
+        coordenadas = readLine()!; // 2.1 Obtener Coordenadas de String
+        if coordenadas == "salir"{
+            coordenadasValidas = false;
+        }
+        else{
+            coordenadasValidas = true;
+            let coordenadasTupla = obtenerCoordenadas(coordenadas); // 2.2 Convertir Coordenadas
+            if coordenadasTupla.0 != -1{
+                let checkPosition = checarPosicion(coordenadasTupla.0, coordenadasTupla.1); // 3. Calcular Posición
+                // 3.1 Hay Bomba
+                if checkPosition == -1{
+                    print("PERDISTE")
+                    perdiste=true;
+                    mostrarTablero(tablero)
+                    coordenadasValidas = false;
+                    break;
+                }
+                else{
+                    /* 
+                        Hector Fuentes 77904
+                        77904
+                        11/04/2024
+                    */
+                    mostrarTablero(tablero);
+                    let contieneNegativoDos = tablero.contains { fila in fila.contains(-2)}
+
+                    if contieneNegativoDos {
+                        continue;
+                    } else {
+                        print("Ya Ganaste!!!")
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -175,16 +220,16 @@ Recibe: String (coordenadas)
 Retorna: Tupla (coor1, coor2)
 */
 func obtenerCoordenadas(_ coordenadas:String) -> (coor1:Int , coor2:Int){
-    let coordenadas_trans:[] = coordenadas.split(separator:",");
+    let coordenadas_trans:[String] = coordenadas.split(separator:",").map(String.init);
     if coordenadas_trans.count == 2{
         if let coor1 = Int(coordenadas_trans[0]){
             if let coor2 = Int(coordenadas_trans[1]){
                 return (coor1, coor2)
             }
         }
-        return (nil, nil)
+        return (-1, -1)
     }
-    return (nil, nil)
+    return (-1, -1)
 }
 
 /* FUNCIÓN CHECAR POSICIÓN
@@ -193,37 +238,42 @@ func obtenerCoordenadas(_ coordenadas:String) -> (coor1:Int , coor2:Int){
    Objetivo: 
    Autor: Samuel
 */
-func checarPosicion(_ x: Int, _ y: Int){
-    let coord_x = x - 1;
-    let coord_y = y - 1;
+func checarPosicion(_ x: Int, _ y: Int) -> Int{
+    let coord_x: Int = x - 1;
+    let coord_y: Int = y - 1;
     if coord_x < 0 || coord_y < 0
        || coord_x > tamañoTablero 
        || coord_y > tamañoTablero{
-        return nil;
+        return -3;
     }
 
     let valorEncontrado = tablero[coord_x][coord_y];
+    // 3.1 Hay Bomba
     if valorEncontrado == -1{
         return -1;
     }
     else if valorEncontrado == -2{
-        let bombasEncontradas = bombasCercanas(coord_x, coord_y);
-        if bombasEncontradas > 0{
+        let bombasEncontradas: Int = bombasCercanas(coord_x, coord_y);
+        if bombasEncontradas > 0{ //
             tablero[coord_x][coord_y] = bombasEncontradas;
         }
         else{
-            
+            tablero[coord_x][coord_y] = 0;
+            bombasCercanasRecursiva(coord_x, coord_y)
+            return 0; // TODO
         }
     }
     else{
-
+        return 0; // TODO
     }
+    return 0; //TODO
+    
 }
 
-func bombasCercanas(_ coord_x: Int, _ coord_y: Int){
-    let rango_x: [Int] = max(coord_x - 1 , 0)...min(coord_x + 1 , tamañoTablero - 1) 
-    let rango_y: [Int] = max(coord_y - 1 , 0)...min(coord_y + 1 , tamañoTablero - 1)
-    var contadorMinas = 0;
+func bombasCercanas(_ coord_x: Int, _ coord_y: Int) -> Int{
+    let rango_x: [Int] = Array(max(coord_x - 1, 0)...min(coord_x + 1, tamañoTablero - 1));
+    let rango_y: [Int] = Array(max(coord_y - 1 , 0)...min(coord_y + 1 , tamañoTablero - 1));
+    var contadorMinas: Int = 0;
 
     for i in rango_x{
         for j in rango_y{
@@ -239,23 +289,25 @@ func bombasCercanas(_ coord_x: Int, _ coord_y: Int){
 }
 
 func bombasCercanasRecursiva(_ coord_x: Int, _ coord_y: Int){
-    let rango_x: [Int] = max(coord_x - 1 , 0)...min(coord_x + 1 , tamañoTablero - 1) 
-    let rango_y: [Int] = max(coord_y - 1 , 0)...min(coord_y + 1 , tamañoTablero - 1)
+    let rango_x: [Int] = Array(max(coord_x - 1 , 0)...min(coord_x + 1 , tamañoTablero - 1)); 
+    let rango_y: [Int] = Array(max(coord_y - 1 , 0)...min(coord_y + 1 , tamañoTablero - 1));
 
     for i in rango_x{
         for j in rango_y{
             if i == coord_x && j == coord_y{
                 continue
             }
-            if tablero[i][j] != -1{
+            if tablero[i][j] != -1 && tablero[i][j] == -2{
                 if bombasCercanas(i, j) > 0{
-                    return nil;
+                    tablero[i][j] = bombasCercanas(i, j);
                 }
                 else{
+                    tablero[i][j] = 0;
                     bombasCercanasRecursiva(i, j);
                 }
             }
         }
     }
-    return contadorMinas;
 }
+
+jugar();
