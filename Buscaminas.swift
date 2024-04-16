@@ -22,6 +22,7 @@ var tamañoTablero: Int = 5;
   1 -> Bomba Cerca (tocada) */
 
  var perdiste: Bool = false;
+ var ganaste: Bool = false;
  var coordenadas: String = ""; 
 
 /*
@@ -75,8 +76,11 @@ func mostrarTablero(_ tablero: [[Int]]){
                     print("⬜️",terminator:"");
                 case -1:
                     if perdiste == true {
+                        print("💥",terminator:"");
+                    }else if ganaste == true {
                         print("💣",terminator:"");
-                    }else {
+                    }
+                    else {
                         print("⬜️",terminator:"");
                     }
                 case 0:
@@ -202,7 +206,9 @@ func jugar(){
                     if contieneNegativoDos {
                         continue;
                     } else {
-                        print("Ya Ganaste!!!")
+                        print("Ya Ganaste!!!");
+                        ganaste = true;
+                        mostrarTablero(tablero);
                         break;
                     }
                 }
